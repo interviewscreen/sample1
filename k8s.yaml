@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: my-application
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: my-application
+  template:
+    metadata:
+      labels:
+        app: my-application-2
+    spec:
+      containers:
+      - name: my-application
+        image: my-application:1.0.0
+        ports:
+        - containerPort: 8081
+        livenessProbe:
+          httpGet:
+            path: /sample_probe
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      - name: secrets-sidecar
+        image: secrets-manager:latest
+        volumeMounts:
+        - name: secrets-volume
+          mountPath: /etc/secrets
+      volumes:
+      - name: secrets-volume
+        emptyDir: {}
